@@ -112,5 +112,28 @@ Le dashboard interactif utilise les fichiers générés:
 
 ---
 
-**Contacts :** justine.ruch@u-bordeaux.fr 
+##  Contributeurs
+
+<table>
+  <tr>
+    <td align="center" style="padding: 10px;">
+      <a href="https://github.com/anais-ait">
+        <img src="https://secure.gravatar.com/avatar/7d204642ca72d0d776aedb48dbc2886667564dde24fd2d7dde26d07fa1c4a2ab?s=1600&d=identicon" width="100" height="100" alt="" style="border-radius:50%;"/><br />
+        <sub><b>Anais Ait abdelkader</b></sub>
+      </a><br />
+      <sub>CMI ISI</sub>
+    </td>
+    <td align="center" style="padding: 10px;">
+      <a href="https://github.com/juruch">
+        <img src="https://secure.gravatar.com/avatar/d53c9c96ab8323d7fb5c21de49ed73eeacb341d366be7e98acf024ae3bea8bff?s=1600&d=identicon" width="100" height="100" alt="" style="border-radius:50%;"/><br />
+        <sub><b>Justine Ruch</b></sub>
+      </a><br />
+      <sub>CMI ISI</sub>
+  </tr>
+</table>
+
+**Contacts :** 
+
 anais.ait-abdelkader@u-bordeaux.fr 
+
+justine.ruch@u-bordeaux.fr 
