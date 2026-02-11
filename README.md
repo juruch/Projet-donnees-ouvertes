@@ -76,22 +76,6 @@
 - Prédictions 2026 (CSV)
 - Données pour dashboard (CSV)
 
-
-## Fichiers Générés
-
-### Graphiques (PNG + HTML)
-1. `evolution_prix.png` - Évolution temporelle des prix médians et moyens
-2. `scatter_pop_prix.html` - Scatter plot interactif Population vs Prix
-3. `heatmap_correlation.png` - Matrice de corrélation
-4. `taux_croissance.html` - Comparaison taux de croissance interactif
-5. `predictions_evolution.html` - Prédictions 2025-2026 interactives
-6. `communes_top100.html` - Analyse communale animée
-
-### Données (CSV)
-1. `resultats_modeles.csv` - Résumé des performances des modèles
-2. `predictions_2026.csv` - Prédictions par département pour 2026
-3. `donnees_dashboard.csv` - Dataset complet pour dashboard interactif
-
 ## Instructions d'Utilisation
 
 ### Exécution du Notebook
