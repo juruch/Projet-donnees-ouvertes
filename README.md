@@ -76,37 +76,6 @@
 - Prédictions 2026 (CSV)
 - Données pour dashboard (CSV)
 
-## Résultats Principaux
-
-### 1. Corrélation Population-Prix
-✓ **Corrélation positive significative** (r ≈ 0.4-0.5)
-- Les départements plus peuplés ont des prix plus élevés
-- Relation non-linéaire: effet de saturation dans les métropoles
-
-### 2. Impact de la Structure par Âge
-✓ **Proportion 20-39 ans:** Corrélation positive forte
-- Segments d'âge actifs économiquement → demande immobilière élevée
-
-✓ **Proportion 75+ ans:** Corrélation négative
-- Départements vieillissants → prix moins dynamiques
-
-✓ **Amélioration du modèle:** +15-25% en ajoutant la structure d'âge
-
-### 3. Élasticité
-✓ **Élasticité estimée:** ≈ 0.3-0.5
-- **Interprétation:** +1% de population → +0.3 à 0.5% de prix
-- Confirme l'effet significatif mais non-proportionnel
-
-### 4. Dynamique de Croissance
-✓ **Corrélation faible** entre taux de croissance pop et prix (r ≈ 0.1-0.2)
-- Les effets se manifestent sur le long terme
-- Importance des facteurs non-démographiques à court terme
-
-### 5. Hétérogénéité Territoriale
-✓ **Fortes disparités entre départements:**
-- **Île-de-France:** Prix très élevés (>400k€) malgré croissance démographique modérée
-- **Métropoles régionales:** Prix élevés (200-300k€) avec forte attractivité
-- **Zones rurales:** Prix bas (<150k€) malgré déclin démographique limité
 
 ## Fichiers Générés
 
@@ -122,65 +91,6 @@
 1. `resultats_modeles.csv` - Résumé des performances des modèles
 2. `predictions_2026.csv` - Prédictions par département pour 2026
 3. `donnees_dashboard.csv` - Dataset complet pour dashboard interactif
-
-### Code
-1. `final_notebook.py` - Notebook Python complet et commenté
-
-## Limites et Perspectives
-
-### Limites
-- Modèles linéaires simples (relations plus complexes possibles)
-- Nombreux facteurs non-démographiques non pris en compte:
-  - Revenus, emploi, politique du logement
-  - Taux d'intérêt, accès au crédit
-  - Attractivité économique, infrastructures
-- Données 2025 partielles (année en cours)
-- Pas d'analyse spatiale (effets de voisinage)
-
-### Perspectives d'Amélioration
-1. **Données supplémentaires:**
-   - Variables économiques (PIB, revenus, emploi)
-   - Variables géographiques (distance aux métropoles)
-   - Variables politiques (ZAN, réglementation)
-
-2. **Modèles plus avancés:**
-   - Random Forest, XGBoost (relations non-linéaires)
-   - Modèles à effets fixes (panel data)
-   - Modèles spatio-temporels
-
-3. **Analyses complémentaires:**
-   - Segmentation par type de bien (maison/appartement)
-   - Analyse des migrations internes
-   - Impact du télétravail post-COVID
-
-## Réponse au Professeur
-
-### Question 1: "Quels modèles de prédiction vous considérez ?"
-**Réponse:** Nous utilisons 3 approches complémentaires:
-1. **Régression linéaire simple** (baseline): Population → Prix
-2. **Régression multiple**: Population + Structure d'âge → Prix
-3. **Modèle Log-Log**: Pour estimer l'élasticité prix/population
-
-Ces modèles sont entraînés sur 2020-2024 et testés sur 2025, puis utilisés pour prédire 2026.
-
-### Question 2: "Pourquoi se restreindre aux 10 villes les plus peuplées ?"
-**Réponse corrigée:** Nous avons étendu l'analyse aux **100 communes les plus peuplées** (pas seulement 10) pour avoir une représentation significative du territoire tout en conservant un volume de données gérable. Ces 100 communes représentent environ 30% de la population française et incluent toutes les métropoles majeures.
-
-### Question 3: "Que voulez-vous dire par 'Comparer les valeurs de 2020 à 2026' ?"
-**Réponse:** Notre analyse comporte deux volets:
-
-**Pour les départements (2020-2026):**
-- Analyse descriptive de l'évolution réelle 2020-2025
-- Modélisation de la relation Population/Prix sur 2020-2024
-- Test du modèle sur 2025 (validation)
-- Prédiction pour 2026 basée sur les projections démographiques INSEE
-
-**Pour les communes (2020-2023):**
-- Analyse de la relation Population/Prix au niveau local
-- Identification des patterns différents du niveau départemental
-- Pas de prédiction car données démographiques limitées à 2023
-
-Il s'agit donc d'une **analyse de régression** avec capacité prédictive, pas de classification.
 
 ## Instructions d'Utilisation
 
@@ -216,13 +126,7 @@ Le dashboard interactif utilise les fichiers générés:
 - `donnees_dashboard.csv` - Données principales
 - Fichiers HTML interactifs (Plotly)
 
-**Contenu recommandé du dashboard:**
-1. Carte interactive de France avec valeurs par département (slider temporel)
-2. Graphiques d'évolution temporelle
-3. Scatter plots avec filtres interactifs
-4. Prédictions 2026 avec intervalles de confiance
-5. Analyse communale pour les grandes villes
-
 ---
 
-**Contact:** justine.ruch@u-bordeaux.fr
+**Contacts :** justine.ruch@u-bordeaux.fr 
+anais.ait-abdelkader@u-bordeaux.fr 
