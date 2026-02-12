@@ -4,9 +4,9 @@ from dash import dcc, html
 def create_nav_bar():
     nav_links = [
         {'label': 'Accueil', 'href': '/'},
-        {'label': 'Page 1', 'href': '/page1'},
-        {'label': 'Page 2', 'href': '/page2'},
-        {'label': 'Page 3', 'href': '/page3'},
+        {'label': 'Département', 'href': '/page1'},
+        {'label': 'Commune', 'href': '/page2'},
+        {'label': 'Age', 'href': '/page3'},
     ]
 
     nav_bar = html.Div(
