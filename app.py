@@ -1,50 +1,80 @@
 import dash
 from dash import dcc, html, Input, Output
-from data_loader import extract_all_zips
 import os
 
-# Extraire les fichiers ZIP seulement si nécessaire
-# Vérifier si un fichier "marker" existe pour éviter de ré-extraire à chaque redémarrage
-if not os.path.exists('.extracted'):
-    extract_all_zips()
-    # Créer un fichier marker pour indiquer que l'extraction est faite
-    with open('.extracted', 'w') as f:
-        f.write('done')
-
-# Créer l'application Dash
+# ===== CRÉER L'APP IMMÉDIATEMENT =====
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server  # CRITIQUE pour Gunicorn
 
-# IMPORTANT: Cette ligne doit être APRÈS app = dash.Dash()
-server = app.server
+# ===== VARIABLES GLOBALES =====
+data = None
+data_loaded = False
 
-# Importer les modules des pages après l'instanciation de l'application
-from pages import home, page1, page2, page3, page4
-from pages.navigation import create_nav_bar
+# ===== IMPORTER LES PAGES =====
+try:
+    from pages import home, page1, page2, page3, page4
+    from pages.navigation import create_nav_bar
+    pages_ok = True
+except Exception as e:
+    print(f"⚠️ Erreur import pages: {e}")
+    pages_ok = False
 
-# Layout principal
-app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),  # Gère l'URL
-    create_nav_bar(),                        # Barre de navigation
-    html.Div(id='page-content')              # Contenu dynamique
-])
+# ===== LAYOUT =====
+if pages_ok:
+    app.layout = html.Div([
+        dcc.Location(id='url', refresh=False),
+        create_nav_bar(),
+        html.Div(id='page-content'),
+        dcc.Interval(id='data-check', interval=2000, n_intervals=0)
+    ])
+else:
+    app.layout = html.Div([html.H1("Erreur de configuration")])
 
-# Callback pour changer le contenu en fonction de l'URL
-@app.callback(
-    Output('page-content', 'children'),
-    Input('url', 'pathname')
-)
-def display_page(pathname):
-    if pathname == '/page1':
-        return page1.layout
-    elif pathname == '/page2':
-        return page2.layout
-    elif pathname == '/page3':
-        return page3.layout
-    elif pathname == '/page4':
-        return page4.layout
-    else:  # Accueil ou URL inconnue
-        return home.layout
+# ===== CHARGER LES DONNÉES APRÈS LE DÉMARRAGE =====
+def load_data_once():
+    global data, data_loaded
+    if not data_loaded:
+        try:
+            from data_loader import load_all_data
+            print("📂 Chargement du cache...")
+            data = load_all_data()
+            data_loaded = True
+            print("✅ Données chargées !")
+        except Exception as e:
+            print(f"❌ Erreur: {e}")
+            import traceback
+            traceback.print_exc()
 
-# Lancement de l'application
+# ===== CALLBACK =====
+if pages_ok:
+    @app.callback(
+        Output('page-content', 'children'),
+        [Input('url', 'pathname'),
+         Input('data-check', 'n_intervals')]
+    )
+    def display_page(pathname, n):
+        # Charger les données si pas encore fait
+        if not data_loaded:
+            load_data_once()
+        
+        # Si toujours pas chargé, afficher message
+        if not data_loaded:
+            return html.Div([
+                html.H2("⏳ Chargement des données..."),
+                html.P("Cela peut prendre 1-2 minutes. Veuillez patienter.")
+            ])
+        
+        # Données OK, afficher la page
+        if pathname == '/page1':
+            return page1.layout
+        elif pathname == '/page2':
+            return page2.layout
+        elif pathname == '/page3':
+            return page3.layout
+        elif pathname == '/page4':
+            return page4.layout
+        else:
+            return home.layout
+
 if __name__ == "__main__":
-    app.run_server(debug=True, use_reloader=False)
+    app.run_server(debug=True)
