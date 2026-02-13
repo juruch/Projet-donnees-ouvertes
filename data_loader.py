@@ -9,10 +9,12 @@ CACHE_FILE = "cache.pkl"
 
 def load_all_data():
 
-    if os.path.exists(CACHE_FILE):
-        print("📂 Chargement du cache...")
-        with open(CACHE_FILE, "rb") as f:
+    extract_all_zips()  
+
+    if os.path.exists(cache_file):
+        with open(cache_file, 'rb') as f:
             return pickle.load(f)
+
 
     print("⚙️ Génération des données...")
 
