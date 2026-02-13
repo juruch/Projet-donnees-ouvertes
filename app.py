@@ -34,7 +34,7 @@ extract_all_zips()
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
-from pages import home, page1, page2, page3  
+from pages import home, page1, page2, page3, page4  
 from pages.navigation import create_nav_bar
 
 # Layout principal
@@ -56,6 +56,8 @@ def display_page(pathname):
         return page2.layout
     elif pathname == '/page3':
         return page3.layout
+    elif pathname == '/page4':
+        return page4.layout
     else:  # Accueil ou URL inconnue
         return home.layout
 

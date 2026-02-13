@@ -39,7 +39,7 @@ foncieres_all.loc[
 # =============================
 top_100_communes = (
     pop_communes
-    .nlargest(300, "pop_2023")
+    .nlargest(100, "pop_2023")
     .copy()
 )
 
@@ -80,7 +80,7 @@ fig_scatter = px.scatter(
     size="Nb_transactions",
     animation_frame="annee",
     hover_name="nom_commune",
-    title="Valeurs foncières vs Population — Top 300 communes",
+    title="Valeurs foncières vs Population — Top 100 communes",
     labels={
         "pop_2023": "Population (2023)",
         "Valeur_mediane": "Valeur foncière médiane (€)",

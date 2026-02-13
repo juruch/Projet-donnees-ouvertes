@@ -7,6 +7,7 @@ def create_nav_bar():
         {'label': 'Département', 'href': '/page1'},
         {'label': 'Commune', 'href': '/page2'},
         {'label': 'Age', 'href': '/page3'},
+        {'label': 'Prédiction', 'href': '/page4'},
     ]
 
     nav_bar = html.Div(

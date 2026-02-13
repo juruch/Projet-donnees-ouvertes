@@ -146,7 +146,7 @@ fig_bar = px.bar(
     animation_frame="annee",
     orientation="h",
     color="Valeur_mediane",
-    title="🏆 Top 20 des départements par valeur foncière médiane",
+    title="Top 20 des départements par valeur foncière médiane",
     labels={
         "Valeur_mediane": "Valeur médiane (€)",
         "Nom_departement": "Département"
