@@ -2,6 +2,31 @@ import os
 import zipfile
 import pandas as pd
 import pickle
+import os
+import pickle
+
+CACHE_FILE = "cache.pkl"
+
+def load_all_data():
+
+    if os.path.exists(CACHE_FILE):
+        print("📂 Chargement du cache...")
+        with open(CACHE_FILE, "rb") as f:
+            return pickle.load(f)
+
+    print("⚙️ Génération des données...")
+
+    # TON CODE DE CHARGEMENT CSV ICI
+    data = {
+        "foncieres_all": foncieres_all,
+        "pop": pop,
+    }
+
+    with open(CACHE_FILE, "wb") as f:
+        pickle.dump(data, f)
+
+    return data
+
 
 zip_folder = "data"
 cache_file = "data/cache_data.pkl"
