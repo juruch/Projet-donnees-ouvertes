@@ -1,70 +1,67 @@
-import dash
 from dash import dcc, html
 import plotly.express as px
-from data_loader import load_all_data
 import pandas as pd
 from pages.constants import DEPT_NAMES
 
-# =============================
-# Enregistrement de la page
-# =============================
-dash.register_page(__name__, path="/page1")
-
-# =============================
-# LAYOUT EN FONCTION
-# =============================
-def layout():
-    """Charge les données seulement quand la page est visitée"""
-    
-    # CHARGEMENT DES DONNÉES
-    data = load_all_data()
-    foncieres_all = data["foncieres_all"]
+def layout(data):
+    foncieres_all = data["foncieres_all"].copy()
     pop_dep_all = data.get("pop_dep_all")
-    
+
+    # Sécurités types
+    foncieres_all["Code departement"] = foncieres_all["Code departement"].astype(str).str.zfill(2)
+    foncieres_all["annee"] = pd.to_numeric(foncieres_all["annee"], errors="coerce")
+    foncieres_all["Valeur fonciere"] = pd.to_numeric(foncieres_all["Valeur fonciere"], errors="coerce")
+    foncieres_all = foncieres_all.dropna(subset=["annee", "Valeur fonciere"])
+
     # AGRÉGATION PAR DÉPARTEMENT
     df_dep = (
         foncieres_all
-        .groupby(["Code departement", "annee"])
+        .groupby(["Code departement", "annee"], as_index=False)
         .agg(
             Valeur_mediane=("Valeur fonciere", "median"),
             Nb_transactions=("Valeur fonciere", "count")
         )
-        .reset_index()
     )
-    
-    # Ajouter le nom du département
-    df_dep["Nom_departement"] = df_dep["Code departement"].map(DEPT_NAMES)
-    
-    # Fusionner avec pop_dep_all
+
+    df_dep["Nom_departement"] = df_dep["Code departement"].map(DEPT_NAMES).fillna(df_dep["Code departement"])
+    df_dep["annee"] = df_dep["annee"].astype(int)
+
+    # Fusionner avec pop_dep_all (si dispo)
+    df_dep["Ensemble_Total"] = 0.0
+
     if pop_dep_all is not None and len(pop_dep_all) > 0:
-        pop_dep_all_copy = pop_dep_all.copy()
-        pop_dep_all_copy = pop_dep_all_copy.rename(columns={'Code_departement': 'Code departement'})
-        
+        pop = pop_dep_all.copy()
+
+        # Harmoniser noms de colonnes
+        if "Code_departement" in pop.columns and "Code departement" not in pop.columns:
+            pop = pop.rename(columns={"Code_departement": "Code departement"})
+
+        pop["Code departement"] = pop["Code departement"].astype(str).str.zfill(2)
+        pop["annee"] = pd.to_numeric(pop["annee"], errors="coerce")
+        pop["Ensemble_Total"] = pd.to_numeric(pop.get("Ensemble_Total"), errors="coerce")
+
+        pop = pop.dropna(subset=["annee"])
+        pop["annee"] = pop["annee"].astype(int)
+
         df_dep = df_dep.merge(
-            pop_dep_all_copy[['Code departement', 'annee', 'Ensemble_Total']],
+            pop[["Code departement", "annee", "Ensemble_Total"]],
             on=["Code departement", "annee"],
             how="left"
         )
-        
-        # Pour les années sans données de population, utiliser les données de 2023
-        annees_manquantes = [a for a in df_dep['annee'].unique() if a not in pop_dep_all_copy['annee'].unique()]
-        if annees_manquantes:
-            for annee_manquante in annees_manquantes:
-                pop_2023 = pop_dep_all_copy[pop_dep_all_copy['annee'] == 2023].copy()
-                pop_2023['annee'] = annee_manquante
-                
-                mask = (df_dep['annee'] == annee_manquante) & (df_dep['Ensemble_Total'].isna())
-                for _, row in pop_2023.iterrows():
-                    dept_mask = mask & (df_dep['Code departement'] == row['Code departement'])
-                    df_dep.loc[dept_mask, 'Ensemble_Total'] = row['Ensemble_Total']
-        
-        df_dep['Ensemble_Total'] = df_dep['Ensemble_Total'].fillna(0)
-    else:
-        df_dep['Ensemble_Total'] = 0
-    
-    # Convertir annee en int
-    df_dep['annee'] = df_dep['annee'].astype(int)
-    
+
+        # fallback: si pas de pop sur certaines années -> on copie 2023
+        if 2023 in set(pop["annee"].unique()):
+            pop_2023 = pop[pop["annee"] == 2023][["Code departement", "Ensemble_Total"]].copy()
+
+            for a in sorted(df_dep["annee"].unique()):
+                if a not in set(pop["annee"].unique()):
+                    df_dep.loc[df_dep["annee"] == a, "Ensemble_Total"] = (
+                        df_dep.loc[df_dep["annee"] == a, "Code departement"]
+                        .map(pop_2023.set_index("Code departement")["Ensemble_Total"])
+                    )
+
+        df_dep["Ensemble_Total"] = df_dep["Ensemble_Total"].fillna(0)
+
     # FIGURE 1 — SCATTER Population vs Valeur médiane
     fig_scatter = px.scatter(
         df_dep,
@@ -90,9 +87,8 @@ def layout():
         template="plotly_white",
         height=600
     )
-    
-    fig_scatter.update_traces(marker=dict(line=dict(width=0.5, color='white')))
-    
+    fig_scatter.update_traces(marker=dict(line=dict(width=0.5, color="white")))
+
     # FIGURE 2 — BARRES ANIMÉES Top 20 départements
     top_20_depts = (
         df_dep.groupby("Code departement")["Valeur_mediane"]
@@ -101,7 +97,7 @@ def layout():
         .head(20)
         .index
     )
-    
+
     fig_bar = px.bar(
         df_dep[df_dep["Code departement"].isin(top_20_depts)],
         x="Valeur_mediane",
@@ -110,22 +106,15 @@ def layout():
         orientation="h",
         color="Valeur_mediane",
         title="Top 20 des départements par valeur foncière médiane",
-        labels={
-            "Valeur_mediane": "Valeur médiane (€)",
-            "Nom_departement": "Département"
-        },
+        labels={"Valeur_mediane": "Valeur médiane (€)", "Nom_departement": "Département"},
         template="plotly_white",
         height=700
     )
-    
-    fig_bar.update_layout(
-        yaxis={"categoryorder": "total ascending"}
-    )
-    
-    # RETOURNER LE LAYOUT
+    fig_bar.update_layout(yaxis={"categoryorder": "total ascending"})
+
     return html.Div([
         html.H1("Valeurs foncières par département"),
         dcc.Graph(figure=fig_scatter),
         html.Hr(),
-        dcc.Graph(figure=fig_bar)
+        dcc.Graph(figure=fig_bar),
     ])
