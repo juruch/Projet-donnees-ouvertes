@@ -4,6 +4,7 @@ from data_loader import extract_all_zips
 
 # Extraire les fichiers ZIP une seule fois au démarrage
 extract_all_zips()
+server=app.server
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
@@ -63,6 +64,4 @@ def display_page(pathname):
 
 # Lancement de l'application
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
-
     app.run(debug=True, use_reloader=False)
