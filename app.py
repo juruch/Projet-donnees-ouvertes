@@ -1,104 +1,50 @@
-import os
-import threading
-
 import dash
 from dash import dcc, html, Input, Output
+from data_loader import extract_all_zips
+import os
 
+# Extraire les fichiers ZIP seulement si nécessaire
+# Vérifier si un fichier "marker" existe pour éviter de ré-extraire à chaque redémarrage
+if not os.path.exists('.extracted'):
+    extract_all_zips()
+    # Créer un fichier marker pour indiquer que l'extraction est faite
+    with open('.extracted', 'w') as f:
+        f.write('done')
+
+# Créer l'application Dash
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+
+# IMPORTANT: Cette ligne doit être APRÈS app = dash.Dash()
 server = app.server
 
-@server.route("/healthz")
-def healthz():
-    return "ok", 200
+# Importer les modules des pages après l'instanciation de l'application
+from pages import home, page1, page2, page3, page4
+from pages.navigation import create_nav_bar
 
-# ===== ETAT GLOBAL =====
-data = None
-data_loaded = False
-data_error = None
-_data_lock = threading.Lock()
+# Layout principal
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),  # Gère l'URL
+    create_nav_bar(),                        # Barre de navigation
+    html.Div(id='page-content')              # Contenu dynamique
+])
 
-# ===== IMPORT PAGES =====
-try:
-    from pages import home, page1, page2, page3, page4
-    from pages.navigation import create_nav_bar
-    pages_ok = True
-except Exception as e:
-    pages_ok = False
-    data_error = f"Erreur import pages: {e}"
-    print(f"⚠️ {data_error}")
+# Callback pour changer le contenu en fonction de l'URL
+@app.callback(
+    Output('page-content', 'children'),
+    Input('url', 'pathname')
+)
+def display_page(pathname):
+    if pathname == '/page1':
+        return page1.layout
+    elif pathname == '/page2':
+        return page2.layout
+    elif pathname == '/page3':
+        return page3.layout
+    elif pathname == '/page4':
+        return page4.layout
+    else:  # Accueil ou URL inconnue
+        return home.layout
 
-# ===== LAYOUT =====
-if pages_ok:
-    app.layout = html.Div([
-        dcc.Location(id="url", refresh=False),
-        create_nav_bar(),
-        html.Div(id="page-content"),
-        dcc.Interval(id="data-check", interval=1500, n_intervals=0)
-    ])
-else:
-    app.layout = html.Div([
-        html.H1("Erreur de configuration"),
-        html.Pre(str(data_error), style={"whiteSpace": "pre-wrap", "color": "crimson"})
-    ])
-
-def load_data_once():
-    global data, data_loaded, data_error
-    if data_loaded:
-        return
-    with _data_lock:
-        if data_loaded:
-            return
-        try:
-            from data_loader import load_all_data
-            print("📂 Chargement des données...")
-            data = load_all_data()
-            data_loaded = True
-            data_error = None
-            print("✅ Données chargées.")
-        except Exception as e:
-            data_error = f"Erreur load_all_data(): {e}"
-            print(f"❌ {data_error}")
-            import traceback
-            traceback.print_exc()
-
-# util: appelle layout() si c'est une fonction
-def render_page(module):
-    lay = getattr(module, "layout", None)
-    if lay is None:
-        return html.Div([html.H2("Page invalide"), html.P("Aucun layout trouvé.")])
-    return lay(data) if callable(lay) else lay
-
-if pages_ok:
-    @app.callback(
-        Output("page-content", "children"),
-        [Input("url", "pathname"), Input("data-check", "n_intervals")]
-    )
-    def display_page(pathname, n):
-        if not data_loaded and data_error is None:
-            load_data_once()
-
-        if data_error is not None:
-            return html.Div([
-                html.H2("❌ Erreur lors du chargement des données"),
-                html.Pre(str(data_error), style={"whiteSpace": "pre-wrap", "color": "crimson"})
-            ])
-
-        if not data_loaded:
-            return html.Div([
-                html.H2("⏳ Chargement des données..."),
-                html.P("Veuillez patienter (premier démarrage).")
-            ])
-
-        if pathname == "/page1":
-            return render_page(page1)
-        elif pathname == "/page2":
-            return render_page(page2)
-        elif pathname == "/page3":
-            return render_page(page3)
-        elif pathname == "/page4":
-            return render_page(page4)
-        else:
-            return render_page(home)
-
+# Lancement de l'application
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8050)), debug=False)
+    app.run(debug=True, use_reloader=False)
