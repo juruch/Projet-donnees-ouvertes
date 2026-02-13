@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: mdashboard-valeurs-foncieres
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT
